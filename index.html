@@ -1,0 +1,1185 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>QuizMaster Pro — C++ Powered</title>
+  <link rel="stylesheet" href="style.css">
+
+</head>
+
+<body>
+
+  <div class="app">
+    <header>
+      <div class="logo">
+        <div class="logo-icon">⚡</div>
+        <div>
+          <h1>Kaun Banega Topper</h1>
+         
+        </div>
+      </div>
+      <div class="badge">Rohit Vishwakarma</div>
+    </header>
+
+    <div class="stats-bar">
+      <div class="stat-card">
+        <div class="stat-label">Total Quizzes</div>
+        <div class="stat-value" id="stat-quizzes">0</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Questions</div>
+        <div class="stat-value" id="stat-questions">0</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Attempts</div>
+        <div class="stat-value" id="stat-attempts">0</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Avg Score</div>
+        <div class="stat-value" id="stat-avg">--%</div>
+      </div>
+    </div>
+
+  
+    <div class="tabs">
+      <button class="tab active" onclick="switchTab('dashboard')">🏠 Dashboard</button>
+      <button class="tab" onclick="switchTab('create')">➕ Create Quiz</button>
+      <button class="tab" onclick="switchTab('take')">▶️ Take Quiz</button>
+      <button class="tab" onclick="switchTab('results')">📊 Results</button>
+      <button class="tab" onclick="switchTab('leaderboard')">🏆 Leaderboard</button>
+    
+    </div>
+
+   
+    <div class="panel active" id="panel-dashboard">
+      <div class="section-header">
+        <div class="section-title">All Quizzes</div>
+        <button class="btn btn-primary" onclick="switchTab('create')">+ New Quiz</button>
+      </div>
+      <div class="quiz-grid" id="quiz-list">
+    
+      </div>
+      <div class="empty-state" id="empty-quizzes" style="display:none;">
+        <div class="icon">📝</div>
+        <p>No quizzes yet.<br>Create your first quiz to get started!</p>
+      </div>
+    </div>
+
+
+    <div class="panel" id="panel-create">
+      <div class="section-header">
+        <div class="section-title" id="create-title">Create New Quiz</div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">📋 Quiz Details</div>
+        <div class="two-col">
+          <div class="form-group">
+            <label>Quiz Title</label>
+            <input type="text" id="quiz-title" placeholder="e.g. Data Structures Final">
+          </div>
+          <div class="form-group">
+            <label>Subject / Topic</label>
+            <input type="text" id="quiz-subject" placeholder="e.g. Computer Science">
+          </div>
+        </div>
+        <div class="two-col">
+          <div class="form-group">
+            <label>Difficulty</label>
+            <select id="quiz-difficulty">
+              <option value="Easy">Easy</option>
+              <option value="Medium" selected>Medium</option>
+              <option value="Hard">Hard</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Time Limit (minutes, 0 = no limit)</label>
+            <input type="number" id="quiz-time" value="10" min="0" max="180">
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Description</label>
+          <textarea id="quiz-desc" placeholder="Brief description of the quiz..."></textarea>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">❓ Add Question</div>
+        <div class="form-group">
+          <label>Question Text</label>
+          <textarea id="q-text" placeholder="Enter your question here..."></textarea>
+        </div>
+        <div class="two-col">
+          <div class="form-group">
+            <label>Option A</label>
+            <input type="text" id="opt-a" placeholder="Option A">
+          </div>
+          <div class="form-group">
+            <label>Option B</label>
+            <input type="text" id="opt-b" placeholder="Option B">
+          </div>
+          <div class="form-group">
+            <label>Option C</label>
+            <input type="text" id="opt-c" placeholder="Option C">
+          </div>
+          <div class="form-group">
+            <label>Option D</label>
+            <input type="text" id="opt-d" placeholder="Option D">
+          </div>
+        </div>
+        <div class="two-col">
+          <div class="form-group">
+            <label>Correct Answer</label>
+            <select id="q-correct">
+              <option value="0">A</option>
+              <option value="1">B</option>
+              <option value="2">C</option>
+              <option value="3">D</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Marks for this Question</label>
+            <input type="number" id="q-marks" value="1" min="1" max="10">
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Explanation (shown after answer)</label>
+          <textarea id="q-explanation" placeholder="Why is this the correct answer? (optional)"
+            style="min-height: 60px;"></textarea>
+        </div>
+        <button class="btn btn-primary" onclick="addQuestion()">+ Add Question</button>
+      </div>
+
+      <div class="card" id="questions-preview-card">
+        <div class="card-title">📜 Questions Added (<span id="q-count">0</span>)</div>
+        <div id="questions-list">
+          <div class="empty-state" id="empty-q">
+            <div class="icon">🤔</div>
+            <p>No questions added yet.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="btn-row">
+        <button class="btn btn-primary" onclick="saveQuiz()">💾 Save Quiz</button>
+        <button class="btn btn-outline" onclick="clearForm()">🗑 Clear Form</button>
+      </div>
+    </div>
+
+    <!-- TAKE QUIZ -->
+    <div class="panel" id="panel-take">
+      <div id="quiz-select-screen">
+        <div class="section-header">
+          <div class="section-title">Select a Quiz</div>
+        </div>
+        <div class="form-group" style="max-width:400px;">
+          <label>Your Name</label>
+          <input type="text" id="player-name" placeholder="Enter your name">
+        </div>
+        <div class="quiz-grid" id="take-quiz-list"></div>
+      </div>
+
+      <div id="quiz-play-screen" style="display:none;">
+        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:20px;">
+          <div>
+            <div style="font-size:1.1rem; font-weight:700;" id="active-quiz-title"></div>
+            <div style="font-size:0.8rem; color:var(--muted); font-family:'Space Mono',monospace;"
+              id="active-quiz-meta"></div>
+          </div>
+          <div class="timer-display" id="timer-display">--:--</div>
+        </div>
+        <div class="quiz-progress">
+          <div class="quiz-progress-fill" id="progress-fill" style="width:0%"></div>
+        </div>
+        <div class="question-box">
+          <div class="question-num" id="q-num"></div>
+          <div class="question-text" id="q-body"></div>
+          <div class="answer-options" id="answer-opts"></div>
+        </div>
+        <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px;">
+          <div style="font-family:'Space Mono',monospace; font-size:0.8rem; color:var(--muted);">
+            Score: <span id="live-score" style="color:var(--accent);">0</span> pts
+          </div>
+          <div class="btn-row">
+            <button class="btn btn-outline btn-sm" onclick="prevQuestion()">← Prev</button>
+            <button class="btn btn-primary btn-sm" onclick="nextQuestion()" id="next-btn">Next →</button>
+            <button class="btn btn-warning btn-sm" onclick="submitQuiz()" id="submit-btn" style="display:none;">Submit
+              Quiz ✓</button>
+          </div>
+        </div>
+        <div id="explanation-box" style="display:none; margin-top:16px;" class="card">
+          <div class="card-title">💡 Explanation</div>
+          <p id="explanation-text" style="color:var(--muted); font-size:0.9rem; line-height:1.6;"></p>
+        </div>
+      </div>
+
+      <div id="quiz-result-screen" style="display:none;">
+        <!-- results shown here -->
+      </div>
+    </div>
+
+    <!-- RESULTS HISTORY -->
+    <div class="panel" id="panel-results">
+      <div class="section-header">
+        <div class="section-title">Results History</div>
+        <button class="btn btn-danger btn-sm" onclick="clearResults()">Clear All</button>
+      </div>
+      <div id="results-list"></div>
+    </div>
+
+    <!-- LEADERBOARD -->
+    <div class="panel" id="panel-leaderboard">
+      <div class="section-header">
+        <div class="section-title">🏆 Leaderboard</div>
+        <select id="lb-filter" style="max-width:200px;" onchange="renderLeaderboard()">
+          <option value="all">All Quizzes</option>
+        </select>
+      </div>
+      <div id="lb-list"></div>
+    </div>
+
+  <!-- TOAST -->
+  <div class="toast" id="toast"></div>
+
+  <script>
+    // ============================================================
+    // C++ LOGIC SIMULATION (normally this would be WebAssembly)
+    // The actual C++ code is shown in the C++ tab
+    // ============================================================
+
+    // This mirrors the C++ functions that would be compiled to WASM
+    const CppEngine = {
+      calcScore: function (correct, total, timeBonus = 0) {
+        if (total === 0) return 0;
+        const base = Math.round((correct / total) * 100);
+        return Math.min(100, base + timeBonus);
+      },
+
+      gradeResult: function (percentage) {
+        if (percentage >= 90) return { grade: 'A+', label: '🌟 Outstanding!', color: '#00f5a0' };
+        if (percentage >= 80) return { grade: 'A', label: '🎉 Excellent!', color: '#00f5a0' };
+        if (percentage >= 70) return { grade: 'B', label: '👍 Good Job!', color: '#00d9f5' };
+        if (percentage >= 60) return { grade: 'C', label: '📚 Keep Going!', color: '#f5a000' };
+        if (percentage >= 50) return { grade: 'D', label: '⚡ Try Harder!', color: '#f5a000' };
+        return { grade: 'F', label: '💪 Needs Work!', color: '#ff4757' };
+      },
+
+      sortLeaderboard: function (entries) {
+        // Mirror of C++ std::sort with comparator
+        return [...entries].sort((a, b) => {
+          if (b.score !== a.score) return b.score - a.score;
+          return a.timeTaken - b.timeTaken; // faster time wins on tie
+        });
+      },
+
+      validateQuestion: function (text, options, correct) {
+        if (!text.trim()) return "Question text is required";
+        for (let i = 0; i < options.length; i++) {
+          if (!options[i].trim()) return `Option ${String.fromCharCode(65 + i)} is empty`;
+        }
+        return null;
+      },
+
+      calcTimeBonus: function (timeUsed, timeLimit) {
+        if (timeLimit === 0) return 0;
+        const ratio = 1 - (timeUsed / timeLimit);
+        return Math.round(ratio * 5); // up to 5 bonus points for speed
+      }
+    };
+
+    // ============================================================
+    // DATA STORE
+    // ============================================================
+    let quizzes = JSON.parse(localStorage.getItem('qms_quizzes') || '[]');
+    let results = JSON.parse(localStorage.getItem('qms_results') || '[]');
+    let editingQuizId = null;
+    let pendingQuestions = [];
+
+    // Active quiz state
+    let activeQuiz = null;
+    let currentQ = 0;
+    let userAnswers = [];
+    let quizStartTime = null;
+    let timerInterval = null;
+    let timeRemaining = 0;
+
+    function save() {
+      localStorage.setItem('qms_quizzes', JSON.stringify(quizzes));
+      localStorage.setItem('qms_results', JSON.stringify(results));
+      updateStats();
+    }
+
+    function updateStats() {
+      document.getElementById('stat-quizzes').textContent = quizzes.length;
+      const totalQ = quizzes.reduce((s, q) => s + q.questions.length, 0);
+      document.getElementById('stat-questions').textContent = totalQ;
+      document.getElementById('stat-attempts').textContent = results.length;
+      if (results.length > 0) {
+        const avg = Math.round(results.reduce((s, r) => s + r.score, 0) / results.length);
+        document.getElementById('stat-avg').textContent = avg + '%';
+      } else {
+        document.getElementById('stat-avg').textContent = '--%';
+      }
+    }
+
+    // ============================================================
+    // TABS
+    // ============================================================
+    function switchTab(tab) {
+      document.querySelectorAll('.tab').forEach((t, i) => {
+        t.classList.toggle('active', ['dashboard', 'create', 'take', 'results', 'leaderboard', 'cpp'][i] === tab);
+      });
+      document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+      document.getElementById('panel-' + tab).classList.add('active');
+
+      if (tab === 'dashboard') renderDashboard();
+      if (tab === 'take') renderTakeList();
+      if (tab === 'results') renderResultsList();
+      if (tab === 'leaderboard') renderLeaderboard();
+      if (tab === 'cpp') renderCppCode();
+      if (tab === 'create' && !editingQuizId) {
+        pendingQuestions = [];
+        renderQList();
+      }
+    }
+
+    // ============================================================
+    // DASHBOARD
+    // ============================================================
+    function renderDashboard() {
+      const el = document.getElementById('quiz-list');
+      const empty = document.getElementById('empty-quizzes');
+      if (quizzes.length === 0) {
+        el.innerHTML = '';
+        empty.style.display = 'block';
+        return;
+      }
+      empty.style.display = 'none';
+      el.innerHTML = quizzes.map(q => `
+    <div class="quiz-card">
+      <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:8px;">
+        <div class="quiz-card-title">${q.title}</div>
+        <span class="diff diff-${q.difficulty.toLowerCase()}">${q.difficulty}</span>
+      </div>
+      <div class="quiz-card-meta">
+        📚 ${q.subject} &nbsp;|&nbsp; ❓ ${q.questions.length} Qs &nbsp;|&nbsp; ⏱ ${q.timeLimit || 0}m
+      </div>
+      <p style="font-size:0.83rem; color:var(--muted); margin-bottom:14px; line-height:1.5;">${q.description || 'No description'}</p>
+      <div class="quiz-card-actions">
+        <button class="btn btn-primary btn-sm" onclick="startQuiz('${q.id}')">▶ Take</button>
+        <button class="btn btn-outline btn-sm" onclick="editQuiz('${q.id}')">✏ Edit</button>
+        <button class="btn btn-danger btn-sm" onclick="deleteQuiz('${q.id}')">🗑</button>
+      </div>
+    </div>
+  `).join('');
+    }
+
+    // ============================================================
+    // CREATE / EDIT QUIZ
+    // ============================================================
+    function addQuestion() {
+      const text = document.getElementById('q-text').value;
+      const opts = [
+        document.getElementById('opt-a').value,
+        document.getElementById('opt-b').value,
+        document.getElementById('opt-c').value,
+        document.getElementById('opt-d').value,
+      ];
+      const correct = parseInt(document.getElementById('q-correct').value);
+      const marks = parseInt(document.getElementById('q-marks').value) || 1;
+      const explanation = document.getElementById('q-explanation').value;
+
+      const err = CppEngine.validateQuestion(text, opts, correct);
+      if (err) { showToast(err, 'error'); return; }
+
+      pendingQuestions.push({ id: Date.now(), text, options: opts, correct, marks, explanation });
+      renderQList();
+
+      // Clear question fields
+      ['q-text', 'opt-a', 'opt-b', 'opt-c', 'opt-d', 'q-explanation'].forEach(id => document.getElementById(id).value = '');
+      document.getElementById('q-marks').value = 1;
+      document.getElementById('q-correct').value = 0;
+      showToast('Question added!');
+    }
+
+    function removeQuestion(id) {
+      pendingQuestions = pendingQuestions.filter(q => q.id !== id);
+      renderQList();
+    }
+
+    function renderQList() {
+      document.getElementById('q-count').textContent = pendingQuestions.length;
+      const el = document.getElementById('questions-list');
+      if (pendingQuestions.length === 0) {
+        el.innerHTML = '<div class="empty-state"><div class="icon">🤔</div><p>No questions added yet.</p></div>';
+        return;
+      }
+      const letters = ['A', 'B', 'C', 'D'];
+      el.innerHTML = pendingQuestions.map((q, i) => `
+    <div class="q-item">
+      <div class="q-text">Q${i + 1}. ${q.text}</div>
+      <div class="q-options">
+        ${q.options.map((o, j) => `<div class="q-option ${j === q.correct ? 'correct' : ''}">
+          <strong>${letters[j]}</strong> ${o} ${j === q.correct ? '✓' : ''}
+        </div>`).join('')}
+      </div>
+      <div class="q-meta">
+        <span class="diff diff-medium">${q.marks} mark${q.marks > 1 ? 's' : ''}</span>
+        ${q.explanation ? `<span style="font-size:0.75rem;color:var(--muted);">💡 Has explanation</span>` : ''}
+        <button class="btn btn-danger btn-sm" onclick="removeQuestion(${q.id})">Remove</button>
+      </div>
+    </div>
+  `).join('');
+    }
+
+    function saveQuiz() {
+      const title = document.getElementById('quiz-title').value.trim();
+      const subject = document.getElementById('quiz-subject').value.trim();
+      const difficulty = document.getElementById('quiz-difficulty').value;
+      const timeLimit = parseInt(document.getElementById('quiz-time').value) || 0;
+      const description = document.getElementById('quiz-desc').value.trim();
+
+      if (!title) { showToast('Quiz title is required!', 'error'); return; }
+      if (pendingQuestions.length === 0) { showToast('Add at least one question!', 'error'); return; }
+
+      if (editingQuizId) {
+        const idx = quizzes.findIndex(q => q.id === editingQuizId);
+        if (idx !== -1) {
+          quizzes[idx] = { ...quizzes[idx], title, subject, difficulty, timeLimit, description, questions: pendingQuestions };
+        }
+        editingQuizId = null;
+        document.getElementById('create-title').textContent = 'Create New Quiz';
+      } else {
+        quizzes.push({
+          id: 'quiz_' + Date.now(),
+          title, subject, difficulty, timeLimit, description,
+          questions: pendingQuestions,
+          createdAt: new Date().toISOString()
+        });
+      }
+
+      save();
+      clearForm();
+      showToast('Quiz saved successfully! 🎉');
+      switchTab('dashboard');
+    }
+
+    function clearForm() {
+      ['quiz-title', 'quiz-subject', 'quiz-desc', 'q-text', 'opt-a', 'opt-b', 'opt-c', 'opt-d', 'q-explanation'].forEach(id => {
+        document.getElementById(id).value = '';
+      });
+      document.getElementById('quiz-time').value = 10;
+      document.getElementById('quiz-difficulty').value = 'Medium';
+      document.getElementById('q-marks').value = 1;
+      pendingQuestions = [];
+      editingQuizId = null;
+      renderQList();
+    }
+
+    function editQuiz(id) {
+      const q = quizzes.find(x => x.id === id);
+      if (!q) return;
+      editingQuizId = id;
+      document.getElementById('quiz-title').value = q.title;
+      document.getElementById('quiz-subject').value = q.subject;
+      document.getElementById('quiz-difficulty').value = q.difficulty;
+      document.getElementById('quiz-time').value = q.timeLimit || 0;
+      document.getElementById('quiz-desc').value = q.description || '';
+      pendingQuestions = [...q.questions];
+      document.getElementById('create-title').textContent = 'Edit Quiz';
+      renderQList();
+      switchTab('create');
+    }
+
+    function deleteQuiz(id) {
+      if (!confirm('Delete this quiz and all its results?')) return;
+      quizzes = quizzes.filter(q => q.id !== id);
+      results = results.filter(r => r.quizId !== id);
+      save();
+      renderDashboard();
+      showToast('Quiz deleted');
+    }
+
+    // ============================================================
+    // TAKE QUIZ
+    // ============================================================
+    function renderTakeList() {
+      const el = document.getElementById('take-quiz-list');
+      if (quizzes.length === 0) {
+        el.innerHTML = '<div class="empty-state"><div class="icon">📭</div><p>No quizzes available.<br>Create one first!</p></div>';
+        return;
+      }
+      el.innerHTML = quizzes.map(q => `
+    <div class="quiz-card">
+      <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:8px;">
+        <div class="quiz-card-title">${q.title}</div>
+        <span class="diff diff-${q.difficulty.toLowerCase()}">${q.difficulty}</span>
+      </div>
+      <div class="quiz-card-meta">📚 ${q.subject} &nbsp;|&nbsp; ❓ ${q.questions.length} Qs &nbsp;|&nbsp; ⏱ ${q.timeLimit || '∞'}m</div>
+      <div class="quiz-card-actions" style="margin-top:12px;">
+        <button class="btn btn-primary btn-sm" onclick="startQuiz('${q.id}')">▶ Start Quiz</button>
+      </div>
+    </div>
+  `).join('');
+    }
+
+    function startQuiz(id) {
+      const quiz = quizzes.find(q => q.id === id);
+      if (!quiz) return;
+
+      const playerName = document.getElementById('player-name').value.trim() || 'Anonymous';
+      if (!playerName) { showToast('Please enter your name!', 'error'); return; }
+
+      activeQuiz = quiz;
+      currentQ = 0;
+      userAnswers = new Array(quiz.questions.length).fill(null);
+      quizStartTime = Date.now();
+
+      document.getElementById('quiz-select-screen').style.display = 'none';
+      document.getElementById('quiz-play-screen').style.display = 'block';
+      document.getElementById('quiz-result-screen').style.display = 'none';
+      document.getElementById('active-quiz-title').textContent = quiz.title;
+      document.getElementById('active-quiz-meta').textContent = `${quiz.questions.length} questions · ${quiz.difficulty} · ${quiz.subject}`;
+
+      // Start timer
+      clearInterval(timerInterval);
+      if (quiz.timeLimit > 0) {
+        timeRemaining = quiz.timeLimit * 60;
+        updateTimer();
+        timerInterval = setInterval(() => {
+          timeRemaining--;
+          updateTimer();
+          if (timeRemaining <= 0) {
+            clearInterval(timerInterval);
+            submitQuiz();
+          }
+        }, 1000);
+      } else {
+        document.getElementById('timer-display').textContent = '∞';
+      }
+
+      renderQuestion();
+      switchTab('take');
+    }
+
+    function updateTimer() {
+      const m = Math.floor(timeRemaining / 60);
+      const s = timeRemaining % 60;
+      const el = document.getElementById('timer-display');
+      el.textContent = `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+      el.classList.toggle('warning', timeRemaining <= 30);
+    }
+
+    function renderQuestion() {
+      if (!activeQuiz) return;
+      const q = activeQuiz.questions[currentQ];
+      const total = activeQuiz.questions.length;
+      const letters = ['A', 'B', 'C', 'D'];
+
+      document.getElementById('q-num').textContent = `Question ${currentQ + 1} of ${total}`;
+      document.getElementById('q-body').textContent = q.text;
+      document.getElementById('progress-fill').style.width = ((currentQ + 1) / total * 100) + '%';
+
+      // Calculate live score using C++ engine
+      let liveScore = 0;
+      userAnswers.forEach((ans, i) => {
+        if (ans === activeQuiz.questions[i].correct) liveScore += activeQuiz.questions[i].marks;
+      });
+      document.getElementById('live-score').textContent = liveScore;
+
+      const answered = userAnswers[currentQ] !== null;
+      document.getElementById('explanation-box').style.display = 'none';
+
+      const opts = document.getElementById('answer-opts');
+      opts.innerHTML = q.options.map((o, i) => `
+    <button class="answer-opt ${userAnswers[currentQ] === i ? 'selected' : ''} ${answered ? (i === q.correct ? 'correct-ans' : (userAnswers[currentQ] === i ? 'wrong-ans' : '')) : ''} ${answered ? 'disabled' : ''}"
+      onclick="${!answered ? `selectAnswer(${i})` : ''}"
+    >
+      <span class="opt-letter">${letters[i]}</span>
+      ${o}
+    </button>
+  `).join('');
+
+      if (answered && q.explanation) {
+        document.getElementById('explanation-text').textContent = q.explanation;
+        document.getElementById('explanation-box').style.display = 'block';
+      }
+
+      const isLast = currentQ === total - 1;
+      document.getElementById('next-btn').style.display = isLast ? 'none' : 'inline-block';
+      document.getElementById('submit-btn').style.display = isLast ? 'inline-block' : 'none';
+    }
+
+    function selectAnswer(idx) {
+      if (userAnswers[currentQ] !== null) return;
+      userAnswers[currentQ] = idx;
+      renderQuestion();
+    }
+
+    function nextQuestion() {
+      if (currentQ < activeQuiz.questions.length - 1) {
+        currentQ++;
+        renderQuestion();
+      }
+    }
+
+    function prevQuestion() {
+      if (currentQ > 0) {
+        currentQ--;
+        renderQuestion();
+      }
+    }
+
+    function submitQuiz() {
+      clearInterval(timerInterval);
+
+      const quiz = activeQuiz;
+      const playerName = document.getElementById('player-name').value.trim() || 'Anonymous';
+      const timeTaken = Math.round((Date.now() - quizStartTime) / 1000);
+
+      let correct = 0, totalMarks = 0, earnedMarks = 0;
+      quiz.questions.forEach((q, i) => {
+        totalMarks += q.marks;
+        if (userAnswers[i] === q.correct) {
+          correct++;
+          earnedMarks += q.marks;
+        }
+      });
+
+      // C++ Engine calculates score & grade
+      const timeBonus = CppEngine.calcTimeBonus(timeTaken, (quiz.timeLimit || 0) * 60);
+      const percentage = CppEngine.calcScore(earnedMarks, totalMarks, timeBonus);
+      const gradeInfo = CppEngine.gradeResult(percentage);
+
+      const result = {
+        id: 'res_' + Date.now(),
+        quizId: quiz.id,
+        quizTitle: quiz.title,
+        player: playerName,
+        score: percentage,
+        earnedMarks, totalMarks, correct,
+        total: quiz.questions.length,
+        timeTaken,
+        grade: gradeInfo.grade,
+        timestamp: new Date().toISOString(),
+        answers: [...userAnswers]
+      };
+
+      results.push(result);
+      save();
+
+      // Show result screen
+      document.getElementById('quiz-play-screen').style.display = 'none';
+      document.getElementById('quiz-result-screen').style.display = 'block';
+      document.getElementById('quiz-result-screen').innerHTML = `
+    <div class="card" style="text-align:center;">
+      <div class="result-grade" style="color:${gradeInfo.color}; margin-bottom:4px;">${gradeInfo.label}</div>
+      <div style="color:var(--muted); font-size:0.9rem; margin-bottom:24px;">${quiz.title} · ${playerName}</div>
+      
+      <div class="result-circle" style="--pct:${percentage * 3.6}deg">
+        <div class="result-pct">
+          ${percentage}%
+          <small>Grade ${gradeInfo.grade}</small>
+        </div>
+      </div>
+
+      <div class="result-breakdown">
+        <div class="rb-item">
+          <div class="rb-val" style="color:var(--accent)">${correct}</div>
+          <div class="rb-lbl">Correct</div>
+        </div>
+        <div class="rb-item">
+          <div class="rb-val" style="color:var(--danger)">${quiz.questions.length - correct}</div>
+          <div class="rb-lbl">Wrong</div>
+        </div>
+        <div class="rb-item">
+          <div class="rb-val" style="color:var(--accent3)">${earnedMarks}/${totalMarks}</div>
+          <div class="rb-lbl">Marks</div>
+        </div>
+        <div class="rb-item">
+          <div class="rb-val" style="color:var(--accent2)">${Math.floor(timeTaken / 60)}m ${timeTaken % 60}s</div>
+          <div class="rb-lbl">Time Taken</div>
+        </div>
+        <div class="rb-item">
+          <div class="rb-val" style="color:var(--accent)">+${timeBonus}</div>
+          <div class="rb-lbl">Speed Bonus</div>
+        </div>
+        <div class="rb-item">
+          <div class="rb-val" style="color:${gradeInfo.color}">${gradeInfo.grade}</div>
+          <div class="rb-lbl">Grade</div>
+        </div>
+      </div>
+
+      <div class="btn-row" style="justify-content:center; margin-top:8px;">
+        <button class="btn btn-primary" onclick="retakeQuiz()">🔄 Retake</button>
+        <button class="btn btn-outline" onclick="reviewAnswers()">📖 Review Answers</button>
+        <button class="btn btn-outline" onclick="goHome()">🏠 Home</button>
+      </div>
+    </div>
+  `;
+
+      // Render answer review below
+      const letters = ['A', 'B', 'C', 'D'];
+      const reviewHtml = quiz.questions.map((q, i) => {
+        const ua = userAnswers[i];
+        const correct2 = ua === q.correct;
+        return `
+      <div class="q-item" style="border-color:${correct2 ? 'var(--accent)' : 'var(--danger)'}">
+        <div class="q-text">Q${i + 1}. ${q.text} ${correct2 ? '✅' : '❌'}</div>
+        <div class="q-options">
+          ${q.options.map((o, j) => `<div class="q-option ${j === q.correct ? 'correct' : ''} ${j === ua && !correct2 ? 'wrong-ans' : ''}">
+            <strong>${letters[j]}</strong> ${o} ${j === q.correct ? '✓ Correct' : ''}${j === ua && !correct2 ? ' ✗ Your Answer' : ''}
+          </div>`).join('')}
+        </div>
+        ${q.explanation ? `<p style="font-size:0.82rem;color:var(--muted);margin-top:8px;">💡 ${q.explanation}</p>` : ''}
+      </div>
+    `;
+      }).join('');
+
+      document.getElementById('quiz-result-screen').innerHTML +=
+        `<div class="card" id="review-section" style="display:none;">
+      <div class="card-title">📖 Answer Review</div>
+      ${reviewHtml}
+    </div>`;
+    }
+
+    function reviewAnswers() {
+      const el = document.getElementById('review-section');
+      if (el) el.style.display = el.style.display === 'none' ? 'block' : 'none';
+    }
+
+    function retakeQuiz() {
+      if (activeQuiz) startQuiz(activeQuiz.id);
+    }
+
+    function goHome() {
+      document.getElementById('quiz-select-screen').style.display = 'block';
+      document.getElementById('quiz-play-screen').style.display = 'none';
+      document.getElementById('quiz-result-screen').style.display = 'none';
+      activeQuiz = null;
+    }
+
+    // ============================================================
+    // RESULTS HISTORY
+    // ============================================================
+    function renderResultsList() {
+      const el = document.getElementById('results-list');
+      if (results.length === 0) {
+        el.innerHTML = '<div class="empty-state"><div class="icon">📊</div><p>No results yet. Take a quiz!</p></div>';
+        return;
+      }
+
+      const sorted = [...results].sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+      const gradeColors = { 'A+': '#00f5a0', 'A': '#00f5a0', 'B': '#00d9f5', 'C': '#f5a000', 'D': '#f5a000', 'F': '#ff4757' };
+
+      el.innerHTML = sorted.map(r => `
+    <div class="lb-row">
+      <div style="width:40px;height:40px;border-radius:10px;background:${gradeColors[r.grade] || 'var(--muted)'};display:flex;align-items:center;justify-content:center;color:#0a0a0f;font-weight:800;font-size:0.9rem;flex-shrink:0;">${r.grade}</div>
+      <div style="flex:1;">
+        <div style="font-weight:700;">${r.quizTitle}</div>
+        <div style="font-size:0.78rem;color:var(--muted);font-family:'Space Mono',monospace;">
+          👤 ${r.player} &nbsp;|&nbsp; ${new Date(r.timestamp).toLocaleDateString()} &nbsp;|&nbsp; ⏱ ${Math.floor(r.timeTaken / 60)}m ${r.timeTaken % 60}s
+        </div>
+      </div>
+      <div style="text-align:right;">
+        <div style="font-family:'Space Mono',monospace;color:var(--accent);font-weight:700;">${r.score}%</div>
+        <div style="font-size:0.75rem;color:var(--muted);">${r.correct}/${r.total} correct</div>
+      </div>
+    </div>
+  `).join('');
+    }
+
+    function clearResults() {
+      if (!confirm('Clear all result history?')) return;
+      results = [];
+      save();
+      renderResultsList();
+      showToast('Results cleared');
+    }
+
+    // ============================================================
+    // LEADERBOARD
+    // ============================================================
+    function renderLeaderboard() {
+      const filter = document.getElementById('lb-filter').value;
+
+      // Populate filter
+      const sel = document.getElementById('lb-filter');
+      const currentVal = sel.value;
+      sel.innerHTML = '<option value="all">All Quizzes</option>' +
+        quizzes.map(q => `<option value="${q.id}">${q.title}</option>`).join('');
+      sel.value = currentVal;
+
+      let filtered = results;
+      if (filter !== 'all') filtered = results.filter(r => r.quizId === filter);
+
+      // C++ engine sorts the leaderboard
+      const sorted = CppEngine.sortLeaderboard(filtered);
+
+      const el = document.getElementById('lb-list');
+      if (sorted.length === 0) {
+        el.innerHTML = '<div class="empty-state"><div class="icon">🏆</div><p>No results yet!</p></div>';
+        return;
+      }
+
+      const medals = ['🥇', '🥈', '🥉'];
+      el.innerHTML = sorted.map((r, i) => `
+    <div class="lb-row ${i === 0 ? 'top-1' : i === 1 ? 'top-2' : i === 2 ? 'top-3' : ''}">
+      <div class="lb-rank">${medals[i] || `#${i + 1}`}</div>
+      <div class="lb-name">
+        ${r.player}
+        <div style="font-size:0.75rem;color:var(--muted);margin-top:2px;">${r.quizTitle}</div>
+      </div>
+      <div style="text-align:right;">
+        <div class="lb-score">${r.score}%</div>
+        <div class="lb-time">${Math.floor(r.timeTaken / 60)}m ${r.timeTaken % 60}s</div>
+      </div>
+    </div>
+  `).join('');
+    }
+
+    // ============================================================
+    // C++ CODE DISPLAY
+    // ============================================================
+    function renderCppCode() {
+      document.getElementById('cpp-code').textContent = `// =====================================================
+// QuizMaster Pro — C++ Backend Logic
+// Compile with: em++ quiz_system.cpp -o quiz_system.js
+//   -s EXPORTED_FUNCTIONS='["_calcScore","_gradeResult"]'
+//   -s EXPORTED_RUNTIME_METHODS='["ccall","cwrap"]'
+// =====================================================
+#include <iostream>
+#include <vector>
+#include <string>
+#include <algorithm>
+#include <numeric>
+#include <map>
+#include <cmath>
+#include <emscripten/emscripten.h>
+
+using namespace std;
+
+─────────────────────────────────────────────────
+
+
+extern "C" {
+    EMSCRIPTEN_KEEPALIVE
+    int calcScore(int earned, int total, int bonus) {
+        ...
+    }
+}
+struct Question {
+    string text;
+    string options[4];
+    int correct;
+    int marks;
+    string explanation;
+};
+
+struct Quiz {
+    string id;
+    string title;
+    string subject;
+    string difficulty;
+    int timeLimit;  // minutes, 0 = unlimited
+    vector<Question> questions;
+};
+
+struct Result {
+    string player;
+    string quizId;
+    int score;        // percentage 0-100
+    int earnedMarks;
+    int totalMarks;
+    int correct;
+    int timeTaken;    // seconds
+    string grade;
+};
+
+// ─────────────────────────────────────────────────────
+// CORE SCORING ENGINE — exported to JavaScript/WASM
+// ─────────────────────────────────────────────────────
+
+extern "C" {
+
+    // Calculate percentage score with optional time bonus
+    EMSCRIPTEN_KEEPALIVE
+    int calcScore(int earnedMarks, int totalMarks, int timeBonus) {
+        if (totalMarks == 0) return 0;
+        int base = (int)round((double)earnedMarks / totalMarks * 100);
+        return min(100, base + timeBonus);
+    }
+
+    // Grade result: returns encoded int (A+=6, A=5, B=4, C=3, D=2, F=1)
+    EMSCRIPTEN_KEEPALIVE
+    int gradeResult(int percentage) {
+        if (percentage >= 90) return 6;  // A+
+        if (percentage >= 80) return 5;  // A
+        if (percentage >= 70) return 4;  // B
+        if (percentage >= 60) return 3;  // C
+        if (percentage >= 50) return 2;  // D
+        return 1;                         // F
+    }
+
+    // Calculate time bonus (up to 5 bonus pts for fast completion)
+    EMSCRIPTEN_KEEPALIVE
+    int calcTimeBonus(int timeUsed, int timeLimit) {
+        if (timeLimit == 0) return 0;
+        double ratio = 1.0 - ((double)timeUsed / timeLimit);
+        return max(0, (int)(ratio * 5));
+    }
+
+    // Validate quiz: returns 0 if valid, error code otherwise
+    EMSCRIPTEN_KEEPALIVE
+    int validateQuiz(int questionCount, int timeLimitSec) {
+        if (questionCount < 1)   return 1; // ERROR: no questions
+        if (timeLimitSec < 0)    return 2; // ERROR: negative time
+        return 0;                           // VALID
+    }
+
+} // extern "C"
+
+// ─────────────────────────────────────────────────────
+// LEADERBOARD SORTING
+// ─────────────────────────────────────────────────────
+
+class Leaderboard {
+public:
+    vector<Result> entries;
+
+    void addResult(const Result& r) {
+        entries.push_back(r);
+    }
+
+    // Sort: higher score first; ties broken by faster time
+    void sort() {
+        std::sort(entries.begin(), entries.end(), [](const Result& a, const Result& b) {
+            if (a.score != b.score) return a.score > b.score;
+            return a.timeTaken < b.timeTaken;
+        });
+    }
+
+    double getAvgScore() const {
+        if (entries.empty()) return 0.0;
+        int total = accumulate(entries.begin(), entries.end(), 0,
+            [](int sum, const Result& r) { return sum + r.score; });
+        return (double)total / entries.size();
+    }
+
+    Result getTopScore() const {
+        if (entries.empty()) throw runtime_error("No results");
+        return *max_element(entries.begin(), entries.end(),
+            [](const Result& a, const Result& b) { return a.score < b.score; });
+    }
+};
+
+// ─────────────────────────────────────────────────────
+// QUIZ MANAGER CLASS
+// ─────────────────────────────────────────────────────
+
+class QuizManager {
+private:
+    vector<Quiz> quizzes;
+    Leaderboard leaderboard;
+    map<string, vector<Result>> resultsByQuiz;
+
+public:
+    // Add a new quiz
+    void addQuiz(const Quiz& quiz) {
+        quizzes.push_back(quiz);
+    }
+
+    // Remove quiz by ID
+    void removeQuiz(const string& id) {
+        quizzes.erase(remove_if(quizzes.begin(), quizzes.end(),
+            [&](const Quiz& q) { return q.id == id; }), quizzes.end());
+    }
+
+    // Get quiz by ID
+    Quiz* getQuiz(const string& id) {
+        for (auto& q : quizzes) {
+            if (q.id == id) return &q;
+        }
+        return nullptr;
+    }
+
+    // Evaluate user's answers and return Result
+    Result evaluateAttempt(const string& quizId, const string& player,
+                           const vector<int>& userAnswers, int timeTaken) {
+        Quiz* quiz = getQuiz(quizId);
+        if (!quiz) throw runtime_error("Quiz not found: " + quizId);
+
+        int correct = 0, earned = 0, total = 0;
+        for (size_t i = 0; i < quiz->questions.size(); i++) {
+            total += quiz->questions[i].marks;
+            if (i < userAnswers.size() && userAnswers[i] == quiz->questions[i].correct) {
+                correct++;
+                earned += quiz->questions[i].marks;
+            }
+        }
+
+        int timeLimitSec = quiz->timeLimit * 60;
+        int bonus = calcTimeBonus(timeTaken, timeLimitSec);
+        int percentage = calcScore(earned, total, bonus);
+        int gradeCode = gradeResult(percentage);
+
+        string gradeStr;
+        switch(gradeCode) {
+            case 6: gradeStr = "A+"; break;
+            case 5: gradeStr = "A";  break;
+            case 4: gradeStr = "B";  break;
+            case 3: gradeStr = "C";  break;
+            case 2: gradeStr = "D";  break;
+            default: gradeStr = "F"; break;
+        }
+
+        Result result = {player, quizId, percentage, earned, total,
+                         correct, timeTaken, gradeStr};
+
+        leaderboard.addResult(result);
+        resultsByQuiz[quizId].push_back(result);
+
+        return result;
+    }
+
+    // Get sorted leaderboard
+    vector<Result> getLeaderboard(const string& filterQuizId = "") {
+        leaderboard.sort();
+        if (filterQuizId.empty() || filterQuizId == "all") {
+            return leaderboard.entries;
+        }
+        vector<Result> filtered;
+        copy_if(leaderboard.entries.begin(), leaderboard.entries.end(),
+                back_inserter(filtered),
+                [&](const Result& r) { return r.quizId == filterQuizId; });
+        return filtered;
+    }
+
+    // Get statistics for a quiz
+    void printQuizStats(const string& quizId) {
+        auto& res = resultsByQuiz[quizId];
+        if (res.empty()) {
+            cout << "No attempts for this quiz yet." << endl;
+            return;
+        }
+        double avg = accumulate(res.begin(), res.end(), 0.0,
+            [](double s, const Result& r) { return s + r.score; }) / res.size();
+        auto maxR = max_element(res.begin(), res.end(),
+            [](const Result& a, const Result& b) { return a.score < b.score; });
+        cout << "Attempts: " << res.size() << endl;
+        cout << "Average:  " << (int)avg << "%" << endl;
+        cout << "Best:     " << maxR->score << "% by " << maxR->player << endl;
+    }
+
+    int getTotalQuizzes() const { return quizzes.size(); }
+
+    int getTotalQuestions() const {
+        return accumulate(quizzes.begin(), quizzes.end(), 0,
+            [](int s, const Quiz& q) { return s + (int)q.questions.size(); });
+    }
+};
+
+// ─────────────────────────────────────────────────────
+// MAIN — for terminal testing (not needed for WASM)
+// ─────────────────────────────────────────────────────
+
+#ifndef __EMSCRIPTEN__
+int main() {
+    QuizManager mgr;
+
+    // Create a sample quiz
+    Quiz q;
+    q.id = "quiz_001";
+    q.title = "C++ Basics";
+    q.subject = "Computer Science";
+    q.difficulty = "Medium";
+    q.timeLimit = 10;
+
+    Question q1;
+    q1.text = "What does OOP stand for?";
+    q1.options[0] = "Object Oriented Programming";
+    q1.options[1] = "Open Operational Protocol";
+    q1.options[2] = "Order Of Priority";
+    q1.options[3] = "Object Override Pattern";
+    q1.correct = 0;
+    q1.marks = 2;
+    q1.explanation = "OOP = Object Oriented Programming";
+    q.questions.push_back(q1);
+
+    mgr.addQuiz(q);
+
+    // Simulate attempt
+    vector<int> answers = {0};
+    Result r = mgr.evaluateAttempt("quiz_001", "Alice", answers, 120);
+
+    cout << "Score: " << r.score << "%" << endl;
+    cout << "Grade: " << r.grade << endl;
+
+    return 0;
+}
+#endif`;
+    }
+
+    // ============================================================
+    // UTILITIES
+    // ============================================================
+    function showToast(msg, type = 'success') {
+      const t = document.getElementById('toast');
+      t.textContent = msg;
+      t.className = 'toast' + (type === 'error' ? ' error' : '');
+      t.classList.add('show');
+      setTimeout(() => t.classList.remove('show'), 3000);
+    }
+
+    // ============================================================
+    // SEED DATA (for demo)
+    // ============================================================
+    function seedDemoData() {
+      if (quizzes.length > 0) return;
+
+      quizzes = [
+        {
+          id: 'demo_1',
+          title: 'C++ Fundamentals',
+          subject: 'Computer Science',
+          difficulty: 'Medium',
+          timeLimit: 5,
+          description: 'Test your C++ knowledge covering OOP, STL, and memory management.',
+          createdAt: new Date().toISOString(),
+          questions: [
+            { id: 1, text: 'Which of the following is used to allocate memory dynamically in C++?', options: ['malloc()', 'new', 'alloc()', 'create()'], correct: 1, marks: 2, explanation: '"new" is the C++ operator for dynamic memory allocation.' },
+            { id: 2, text: 'What is the output of: cout << (5 > 3) << endl;', options: ['5', '3', '1', 'true'], correct: 2, marks: 1, explanation: 'Boolean true evaluates to 1 when printed with cout.' },
+            { id: 3, text: 'Which STL container provides O(1) average lookup time?', options: ['vector', 'list', 'unordered_map', 'set'], correct: 2, marks: 2, explanation: 'unordered_map uses hash tables for O(1) average lookup.' },
+            { id: 4, text: 'What does the "virtual" keyword do in C++?', options: ['Makes function inline', 'Enables polymorphism via vtable', 'Allocates on heap', 'Prevents inheritance'], correct: 1, marks: 2, explanation: 'virtual enables runtime polymorphism through a virtual table (vtable).' },
+            { id: 5, text: 'Which smart pointer transfers ownership on assignment?', options: ['shared_ptr', 'weak_ptr', 'unique_ptr', 'auto_ptr'], correct: 2, marks: 2, explanation: 'unique_ptr has move-only semantics, transferring ownership on assignment.' },
+          ]
+        },
+        {
+          id: 'demo_2',
+          title: 'Data Structures Quiz',
+          subject: 'Computer Science',
+          difficulty: 'Hard',
+          timeLimit: 8,
+          description: 'Advanced questions on trees, graphs, and algorithm complexity.',
+          createdAt: new Date().toISOString(),
+          questions: [
+            { id: 6, text: 'What is the time complexity of binary search on a sorted array?', options: ['O(n)', 'O(log n)', 'O(n²)', 'O(1)'], correct: 1, marks: 2, explanation: 'Binary search halves the search space each step → O(log n).' },
+            { id: 7, text: 'Which traversal visits: Left → Root → Right?', options: ['Pre-order', 'Post-order', 'In-order', 'Level-order'], correct: 2, marks: 1, explanation: 'In-order traversal = Left → Root → Right, gives sorted output for BST.' },
+            { id: 8, text: 'Dijkstra\'s algorithm fails with which type of edges?', options: ['Weighted', 'Directed', 'Negative weight', 'Undirected'], correct: 2, marks: 3, explanation: 'Dijkstra assumes non-negative edge weights; use Bellman-Ford for negative.' },
+          ]
+        }
+      ];
+      save();
+    }
+
+    // INIT
+    seedDemoData();
+    updateStats();
+    renderDashboard();
+  </script>
+</body>
+
+</html>
+`;
